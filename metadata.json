@@ -1,0 +1,8 @@
+
+{
+  "name": "Gesture-Ninja",
+  "description": "A high-performance gesture-controlled game where you navigate obstacles using hand movements recognized via MediaPipe.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
