@@ -5,5 +5,5 @@ export const OBSTACLE_MAX_WIDTH = 120;
 export const OBSTACLE_HEIGHT = 20;
 export const PLAYER_SPEED = 12;
 export const FALL_SPEED_BASE = 4;
-export const SPAWN_RATE = 0.02; // Probability of spawning per frame
-export const GESTURE_THRESHOLD = 0.15; // Distance threshold for palm detection
+export const SPAWN_RATE = 0.02; // 每帧生成障碍物的概率
+export const GESTURE_THRESHOLD = 0.15; // 手掌检测的距离阈值

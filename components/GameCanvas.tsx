@@ -20,18 +20,18 @@ interface GameCanvasProps {
 
 const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gameState, setGameState }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  // Fixed: useRef requires an initial argument in some strict environments.
+  // 修复：在某些严格环境下 useRef 需要初始参数
   const requestRef = useRef<number | undefined>(undefined);
   const [score, setScore] = useState(0);
   const keysPressed = useRef<Set<string>>(new Set());
   
-  // Use a ref for gesture to keep the game loop stable and avoid re-renders/re-effects
+  // 使用 ref 保存手势以保持游戏循环稳定并避免重新渲染/重新执行副作用
   const gestureRef = useRef<Gesture>(currentGesture);
   useEffect(() => {
     gestureRef.current = currentGesture;
   }, [currentGesture]);
 
-  // Use refs for callbacks to avoid loop re-dependency
+  // 使用 refs 保存回调函数以避免循环重新依赖
   const onGameOverRef = useRef(onGameOver);
   const setGameStateRef = useRef(setGameState);
   useEffect(() => {
@@ -39,7 +39,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gam
     setGameStateRef.current = setGameState;
   }, [onGameOver, setGameState]);
 
-  // Internal mutable state for the game loop
+  // 游戏循环的内部可变状态
   const gameRef = useRef<GameState>({
     score: 0,
     isGameOver: false,
@@ -61,7 +61,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gam
     setScore(0);
   }, []);
 
-  // Sync game state reset when transitioning to PLAYING state
+  // 当转换到 PLAYING 状态时同步重置游戏状态
   useEffect(() => {
     if (gameState === 'PLAYING') {
       initGame();
@@ -88,28 +88,28 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gam
     const { width, height } = canvasRef.current;
     const state = gameRef.current;
 
-    // Check keyboard inputs
+    // 检查键盘输入
     const isLeftPressed = keysPressed.current.has('ArrowLeft') || keysPressed.current.has('a') || keysPressed.current.has('A');
     const isRightPressed = keysPressed.current.has('ArrowRight') || keysPressed.current.has('d') || keysPressed.current.has('D');
 
-    // Move player based on gesture ref OR keyboard
+    // 根据手势 ref 或键盘移动玩家
     if (gestureRef.current === Gesture.FIST || isLeftPressed) {
       state.playerX = Math.max(0, state.playerX - PLAYER_SPEED);
     } else if (gestureRef.current === Gesture.OPEN || isRightPressed) {
       state.playerX = Math.min(width - PLAYER_SIZE, state.playerX + PLAYER_SPEED);
     }
 
-    // Spawn obstacles
+    // 生成障碍物
     if (Math.random() < SPAWN_RATE) {
       spawnObstacle(width);
     }
 
-    // Update obstacles
+    // 更新障碍物
     for (let i = state.obstacles.length - 1; i >= 0; i--) {
       const obs = state.obstacles[i];
       obs.y += obs.speed;
 
-      // Collision detection
+      // 碰撞检测
       if (
         obs.x < state.playerX + PLAYER_SIZE &&
         obs.x + obs.width > state.playerX &&
@@ -121,15 +121,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gam
         return;
       }
 
-      // Remove off-screen obstacles and increase score
+      // 移除屏幕外的障碍物并增加分数
       if (obs.y > height) {
         state.obstacles.splice(i, 1);
         state.score += 10;
-        // Optimization: update score in React state only every few points or use a separate counter
+        // 优化：仅在每几个点或使用单独的计数器时更新 React 状态中的分数
         setScore(state.score);
       }
     }
-  }, [gameState]); // Only depend on gameState to control the logic flow
+  }, [gameState]); // 仅依赖 gameState 来控制逻辑流程
 
   const draw = useCallback(() => {
     if (!canvasRef.current) return;
@@ -174,7 +174,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gam
     });
   }, []);
 
-  // Main stable loop
+  // 主稳定循环
   const loop = useCallback(() => {
     update();
     draw();
@@ -192,15 +192,15 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gam
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
         canvasRef.current.height = window.innerHeight;
-        // Don't call initGame here as it resets progress. 
-        // Just ensure player is within bounds.
+        // 不要在这里调用 initGame，因为它会重置进度
+        // 只需确保玩家在边界内
         const width = window.innerWidth;
         gameRef.current.playerX = Math.min(gameRef.current.playerX, width - PLAYER_SIZE);
       }
     };
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Set initial size
+    handleResize(); // 设置初始大小
 
     requestRef.current = requestAnimationFrame(loop);
 
@@ -210,7 +210,7 @@ const GameCanvas: React.FC<GameCanvasProps> = ({ currentGesture, onGameOver, gam
       window.removeEventListener('resize', handleResize);
       if (requestRef.current) cancelAnimationFrame(requestRef.current);
     };
-  }, [loop]); // Stable loop ensures this effect only runs once
+  }, [loop]); // 稳定的循环确保此副作用仅运行一次
 
   return (
     <>

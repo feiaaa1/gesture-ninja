@@ -3,8 +3,8 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Gesture } from '../types';
 import { analyzeGesture } from '../services/HandRecognition';
 
-// Use global MediaPipe objects from CDN
-declare const Hands: any;
+// 使用来自 CDN 的全局 MediaPipe 对象
+  declare const Hands: any;
 declare const Camera: any;
 declare const drawConnectors: any;
 declare const drawLandmarks: any;
@@ -20,11 +20,11 @@ const HandOverlay: React.FC<HandOverlayProps> = ({ onGestureChange }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [currentGesture, setCurrentGesture] = useState<Gesture>(Gesture.UNKNOWN);
   
-  // Ref to track active state and prevent calls to deleted WASM objects
+  // 用于跟踪活动状态并防止调用已删除的 WASM 对象的 Ref
   const isActive = useRef(true);
 
-  // Use a ref for the latest gesture change callback to avoid re-initializing 
-  // the entire MediaPipe stack when the callback identity changes.
+  // 使用 ref 保存最新的手势变化回调，以避免在回调标识更改时
+  // 重新初始化整个 MediaPipe 堆栈
   const gestureCallbackRef = useRef(onGestureChange);
   useEffect(() => {
     gestureCallbackRef.current = onGestureChange;
@@ -39,11 +39,11 @@ const HandOverlay: React.FC<HandOverlayProps> = ({ onGestureChange }) => {
     canvasCtx.save();
     canvasCtx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     
-    // Mirror the drawing
+    // 镜像绘制
     canvasCtx.translate(canvasRef.current.width, 0);
     canvasCtx.scale(-1, 1);
 
-    // Draw video frame to canvas overlay
+    // 将视频帧绘制到画布叠加层
     canvasCtx.drawImage(
       results.image, 0, 0, canvasRef.current.width, canvasRef.current.height
     );
@@ -64,7 +64,7 @@ const HandOverlay: React.FC<HandOverlayProps> = ({ onGestureChange }) => {
 
     canvasCtx.restore();
 
-    // Only update state if the component is still active
+    // 仅在组件仍处于活动状态时更新状态
     if (isActive.current) {
       setCurrentGesture(prev => {
         if (prev !== detectedGesture) {
@@ -97,7 +97,7 @@ const HandOverlay: React.FC<HandOverlayProps> = ({ onGestureChange }) => {
 
     const camera = new Camera(videoRef.current, {
       onFrame: async () => {
-        // Critical: Check if component is still active before sending frame to WASM
+        // 关键：在将帧发送到 WASM 之前检查组件是否仍处于活动状态
         if (isActive.current && videoRef.current) {
           try {
             await hands.send({ image: videoRef.current });
@@ -119,14 +119,14 @@ const HandOverlay: React.FC<HandOverlayProps> = ({ onGestureChange }) => {
     return () => {
       isActive.current = false;
       camera.stop();
-      // Use a small delay or try-catch for hands.close to ensure no concurrent WASM access
+      // 使用小延迟或 try-catch 来确保 hands.close 时没有并发的 WASM 访问
       try {
         hands.close();
       } catch (e) {
         console.error("Error closing MediaPipe hands:", e);
       }
     };
-  }, [onResults]); // Stable onResults ensures this effect only runs once
+  }, [onResults]); // 稳定的 onResults 确保此副作用仅运行一次
 
   return (
     <div className="absolute top-4 right-4 w-64 h-48 border-2 border-blue-500 rounded-xl overflow-hidden shadow-2xl bg-black/50 z-50">
